@@ -25,3 +25,4 @@ Missing proper AZ affinity
 Missing proper cluster roles   
 Global set of files to be used across all envs   
 The Github action workflow is not completed 
+With Ingress using AWS ALB the cert for the TLS has to be uploaded to the ACM so that the ALB can use it.
