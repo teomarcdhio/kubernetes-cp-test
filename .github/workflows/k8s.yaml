@@ -1,0 +1,55 @@
+name: PocTerraformApply
+
+on:
+  workflow_dispatch:
+    inputs:
+      resource:
+        type: string
+        description: The resource you would like to apply
+        required: true
+
+env:
+  working-directory: ./aws/envs/poc
+  account-name: POC
+
+jobs:
+  terraform:
+    runs-on: 
+      labels: ubuntu-latest
+
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: eu-west-1
+          aws-access-key-id: ${{ secrets.TERRAFORM_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.TERRAFORM_AWS_SECRET_ACCESS_KEY }}
+
+      - name: Terraform Setup
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.3.6
+
+      - name: Terraform init
+        id: init
+        run: terraform init
+        working-directory: ${{ env.working-directory }}
+        env:
+          TF_CLI_ARGS_init: "-backend-config=backend.hcl"
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
+        working-directory: ${{ env.working-directory }}
+
+      - name: Terraform Apply Resource
+        run: terraform apply --auto-approve
+        working-directory: ${{ env.working-directory }}
